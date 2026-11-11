@@ -3,7 +3,7 @@ EU-CATRINE Testbed Functions
 
 Author: Vincent de Feiter (vincent.defeiter@wur.nl)
 
-Version: 15 July, 2025
+Version: 11 November, 2026
 
 '''
 
@@ -277,7 +277,7 @@ def daily_range(dates, freq, end="18:00"):
     dates : list of datetime.date
         List of date objects for which to generate the time range.
     freq : str  
-        Frequency string for the time range (e.g., '1T', '5T', etc.).
+        Frequency string for the time range (e.g., '1min', '5min', etc.).
     end : str, optional
         End time for the daily range (default is "18:00").
     
@@ -780,7 +780,7 @@ def process_soil_respiration(filepath, date_list_general, date_range):
     df['LI-8250 UTC'] = pd.to_datetime(df['LI-8250 UTC']) - timedelta(hours=4)
     df.set_index('LI-8250 UTC', inplace=True)
     df = df[['LI-870.1']].astype(float)
-    df = df.resample('1T').mean().interpolate()
+    df = df.resample('1min').mean().interpolate()
 
     df = df.loc['2022-08-09 06:00:00':'2022-08-18 18:00:00']
 
@@ -789,10 +789,10 @@ def process_soil_respiration(filepath, date_list_general, date_range):
         daily_data = df[df.index.strftime('%Y-%m-%d') == date]
         daily_data = daily_data.between_time('06:00', '18:00')
         if not daily_data.empty:
-            time_range = pd.date_range(daily_data.index.min(), daily_data.index.max(), freq='30T')
+            time_range = pd.date_range(daily_data.index.min(), daily_data.index.max(), freq='30min')
             resp_values.extend(daily_data.loc[daily_data.index.isin(time_range)]['LI-870.1'].values)
         else:
-            resp_values.extend([np.nan] * len(pd.date_range('06:00', '18:00', freq='30T')))
+            resp_values.extend([np.nan] * len(pd.date_range('06:00', '18:00', freq='30min')))
 
     time_index = pd.DatetimeIndex([
         pd.Timestamp.combine(d, t) for d in date_range for t in pd.date_range('06:00', '18:00', freq='30min').time
